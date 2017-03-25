@@ -38,8 +38,7 @@ self.addEventListener('fetch', event => {
 
     let response;
     if (needStoreForOffline(cacheKey)) {
-        response = caches.match(cacheKey)
-            .then(cacheResponse => cacheResponse || fetchAndPutToCache(cacheKey, event.request));
+        response = fetchAndPutToCache(cacheKey, event.request);
     } else {
         response = fetchWithFallbackToCache(event.request);
     }
@@ -126,8 +125,9 @@ function deleteObsoleteCaches() {
 // Нужно ли при скачивании сохранять ресурс для оффлайна?
 function needStoreForOffline(cacheKey) {
     return cacheKey.includes('vendor/') ||
-        cacheKey.includes('assets/') ||
-        cacheKey.endsWith('jquery.min.js');
+           cacheKey.includes('assets/') ||
+           cacheKey.includes('gifs.html') ||
+           cacheKey.endsWith('jquery.min.js');
 }
 
 // Скачать и добавить в кеш
