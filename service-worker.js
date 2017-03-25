@@ -4,16 +4,29 @@
  * Сервис-воркер, обеспечивающий оффлайновую работу избранного
  */
 
-const CACHE_VERSION = '1.0.0-broken';
+const CACHE_VERSION = '1.0.0';
+
+// Статика для кеширования при oninstall
+const cacheItems = [
+    '/gifs.html',
+    '/assets/blocks.js',
+    '/assets/style.css',
+    '/assets/templates.js',
+    '/vendor/bem-components-dist-5.0.0/touch-phone/bem-components.dev.css',
+    '/vendor/bem-components-dist-5.0.0/touch-phone/bem-components.dev.js',
+    '/vendor/kv-keeper.js-1.0.4/kv-keeper.js',
+    'https://yastatic.net/jquery/3.1.0/jquery.min.js'
+];
 
 importScripts('../vendor/kv-keeper.js-1.0.4/kv-keeper.js');
 
 
 self.addEventListener('install', event => {
     const promise = preCacheAllFavorites()
+        .then(() => preCacheAssets())
+        .then(() => console.log('[ServiceWorker] Installed!'))
         // Вопрос №1: зачем нужен этот вызов?
-        .then(() => self.skipWaiting())
-        .then(() => console.log('[ServiceWorker] Installed!'));
+        .then(() => self.skipWaiting());
 
     event.waitUntil(promise);
 });
@@ -52,6 +65,11 @@ self.addEventListener('message', event => {
     event.waitUntil(promise);
 });
 
+// Закешировать статику
+function preCacheAssets() {
+    return caches.open(CACHE_VERSION)
+        .then(cache => cache.addAll(cacheItems));
+}
 
 // Положить в новый кеш все добавленные в избранное картинки
 function preCacheAllFavorites() {
